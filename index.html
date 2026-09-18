@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>公告輪播</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;background:transparent}.notice{width:100%;overflow:hidden;position:relative;background:#f4f7fb}.viewport{width:100%;overflow:hidden}.track{display:flex;transition:transform .45s ease}.slide{flex:0 0 100%;width:100%;margin:0;position:relative}.slide a,.slide img{display:block;width:100%}.slide img{height:auto;max-height:75vh;object-fit:contain;background:#fff}.slide img.error{min-height:120px;object-fit:contain}.caption{position:absolute;left:1rem;right:1rem;bottom:1rem;margin:0;padding:.55rem .8rem;color:#fff;background:#0009;border-radius:.5rem;font:16px system-ui,sans-serif}.nav{position:absolute;inset:0;display:flex;justify-content:space-between;align-items:center;pointer-events:none}.nav button{pointer-events:auto;width:42px;height:42px;margin:10px;border:0;border-radius:50%;color:#fff;background:#0009;cursor:pointer;font-size:28px;line-height:1}.nav button:hover{background:#155eef}.dots{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:7px}.dots button{width:10px;height:10px;padding:0;border:0;border-radius:50%;background:#fff;box-shadow:0 0 0 1px #555;cursor:pointer}.dots button.active{background:#155eef}.message{padding:24px;text-align:center;color:#526070;font:16px system-ui,sans-serif}
+</style>
+</head>
+<body>
+<main class="notice" aria-label="公告輪播"><div id="message" class="message">正在載入公告…</div><div class="viewport" hidden><div id="track" class="track"></div></div><div id="nav" class="nav" hidden><button id="prev" type="button" aria-label="上一張">‹</button><button id="next" type="button" aria-label="下一張">›</button></div><div id="dots" class="dots" hidden></div></main>
+<script>
+const track=document.getElementById('track'),dots=document.getElementById('dots'),message=document.getElementById('message'),viewport=document.querySelector('.viewport'),nav=document.getElementById('nav');let announcements=[],current=0,timer;
+function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function imageUrl(value){let p=String(value||'').trim();if(!p)return '';if(!/^(https?:|data:|blob:)/i.test(p)){p=p.replace(/^\/+/, '');if(!p.startsWith('data/'))p='data/'+p;p=new URL(p,document.baseURI).href}return p}
+async function loadAnnouncements(){const r=await fetch('data/announcements.json',{cache:'no-store'});if(!r.ok)throw Error('找不到 data/announcements.json，請確認它位於 GitHub repository 的 data 資料夾');const d=await r.json();return(Array.isArray(d)?d:d.announcements||[]).map(i=>({...i,image:imageUrl(i.image)})).filter(i=>i.image)}
+function render(){if(!announcements.length){message.textContent='目前沒有公告，請檢查 data/announcements.json';return}message.hidden=true;viewport.hidden=false;nav.hidden=announcements.length<2;dots.hidden=announcements.length<2;track.innerHTML=announcements.map(i=>{const img=`<img src="${safe(i.image)}" alt="${safe(i.title)}" loading="lazy">`;const c=i.href?`<a href="${safe(i.href)}" target="_top" rel="noopener">${img}</a>`:img;return`<figure class="slide">${c}${i.title?`<figcaption class="caption">${safe(i.title)}</figcaption>`:''}</figure>`}).join('');track.querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>{img.classList.add('error');img.alt='圖片載入失敗：'+img.alt;img.title='請確認 GitHub 的 data 資料夾與 JSON 檔名完全一致'}));dots.innerHTML=announcements.map((_,i)=>`<button type="button" aria-label="第 ${i+1} 張" data-index="${i}"></button>`).join('');dots.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>goTo(+b.dataset.index)));update();startAutoPlay()}
+function update(){track.style.transform=`translateX(-${current*100}%)`;dots.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('active',i===current))}
+function goTo(i){if(!announcements.length)return;current=(i+announcements.length)%announcements.length;update();startAutoPlay()}
+function startAutoPlay(){clearInterval(timer);if(announcements.length>1)timer=setInterval(()=>goTo(current+1),5000)}
+document.getElementById('prev').onclick=()=>goTo(current-1);document.getElementById('next').onclick=()=>goTo(current+1);loadAnnouncements().then(d=>{announcements=d;render()}).catch(e=>message.textContent='公告載入失敗：'+e.message);
+</script>
+</body>
+</html>
