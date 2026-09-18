@@ -1,29 +1,38 @@
 [
   {
+    "id": "notice-001",
     "image": "公告1.jpg",
     "tag": "重要公告",
+    "pinned": true,
     "title": "校務重要公告",
-    "summary": "這裡放公告摘要，讓訪客快速了解本公告的重點內容。",
+    "summary": "這裡是第一則公告的摘要內容，方便訪客在首頁快速掌握重點。",
+    "contentFile": "公告1.txt",
     "date": "2026.09.18",
-    "href": "https://example.com/news-1",
+    "expiresAt": "2026.12.31",
     "buttonText": "查看詳情"
   },
   {
+    "id": "notice-002",
     "image": "公告2.jpg",
     "tag": "活動資訊",
-    "title": "年度活動資訊",
-    "summary": "提供活動日期、報名方式與相關注意事項 。",
+    "pinned": false,
+    "title": "年度活動報名資訊",
+    "summary": "提供活動日期、報名方式與相關注意事項。",
+    "contentFile": "公告2.txt",
     "date": "2026.09.20",
-    "href": "https://example.com/news-2",
+    "expiresAt": "2026.10.15",
     "buttonText": "立即查看"
   },
   {
+    "id": "notice-003",
     "image": "公告3.png",
     "tag": "行政修繕",
+    "pinned": false,
     "title": "校舍修繕通知",
-    "summary": "施工期間請留意通行動線與相關安全提醒 。",
+    "summary": "施工期間請留意通行動線與相關安全提醒。",
+    "contentFile": "公告3.txt",
     "date": "2026.09.25",
-    "href": "https://example.com/news-3",
+    "expiresAt": "2026.10.16",
     "buttonText": "查看詳情"
   }
 ]
