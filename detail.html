@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1f3a">
+  <title>公告詳情｜機關訊息</title>
+  <style>
+    :root { --navy:#091b35; --gold:#c6a15b; --gold-light:#ead6a4; --ink:#17263b; --muted:#66768a; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; min-height:100%; background:#eef2f7; color:var(--ink); font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif; }
+    .top { padding:1rem clamp(1rem,5vw,5rem); color:#fff; background:linear-gradient(115deg,#07172e,#12335a); }
+    .top-inner { display:flex; justify-content:space-between; align-items:center; max-width:1100px; margin:auto; }
+    .brand { color:var(--gold-light); font-size:.75rem; font-weight:800; letter-spacing:.18em; }
+    .back { color:#fff; text-decoration:none; font-size:.85rem; }
+    .back:hover { color:var(--gold-light); }
+    .article { max-width:1100px; margin:2rem auto 4rem; padding:0 1rem; }
+    .panel { overflow:hidden; border:1px solid rgb(255 255 255 / 80%); border-radius:20px; background:rgb(255 255 255 / 76%); box-shadow:0 22px 60px rgb(28 51 79 / 14%), inset 0 1px 0 #fff; backdrop-filter:blur(18px); }
+    .hero { display:block; width:100%; max-height:760px; object-fit:contain; object-position:center; background:#e5ebf2; }
+    .content { padding:clamp(1.3rem,4vw,3.4rem); }
+    .meta { display:flex; flex-wrap:wrap; gap:.55rem 1rem; align-items:center; color:#98763c; font-size:.78rem; font-weight:800; letter-spacing:.08em; }
+    .tag { padding:.35rem .7rem; border:1px solid rgb(198 161 91 / 60%); border-radius:999px; }
+    .pin { color:#fff; background:var(--navy); border-color:var(--navy); }
+    h1 { margin:.8rem 0 1rem; color:var(--navy); font-size:clamp(1.65rem,4vw,3rem); line-height:1.35; letter-spacing:.05em; }
+    .summary { margin:0 0 1.8rem; padding-bottom:1.5rem; border-bottom:1px solid #dbe2ea; color:#596b80; font-size:1.05rem; line-height:1.9; }
+    .body { color:#30445b; font-size:1rem; line-height:2; white-space:pre-line; overflow-wrap:anywhere; word-break:break-word; }
+    .body p { margin:0 0 1.1rem; }
+    .not-found { max-width:700px; margin:5rem auto; padding:2rem; text-align:center; }
+    @media(max-width:600px) { .article { margin-top:1rem; } .hero { max-height:70vh; } .content { padding:1.3rem; } }
+  </style>
+</head>
+<body>
+  <header class="top"><div class="top-inner"><span class="brand">OFFICIAL ANNOUNCEMENT</span><a class="back" href="index.html">← 返回公告列表</a></div></header>
+  <main id="app" class="article"><div class="panel not-found">正在載入公告詳情…</div></main>
+  <script>
+    const app=document.getElementById('app');
+    function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+    function imageUrl(v){let p=String(v||'').trim();if(!/^(https?:|data:|blob:)/i.test(p)){p=p.replace(/^\/+/, '');if(!p.startsWith('data/'))p='data/'+p;p=new URL(p,document.baseURI).href}return p}
+    async function main(){const id=new URLSearchParams(location.search).get('id');const r=await fetch('data/announcements.json',{cache:'no-store'});if(!r.ok)throw Error('找不到公告資料');const d=await r.json();const list=Array.isArray(d)?d:d.announcements||[];const item=list.find((x,i)=>String(x.id??i)===String(id));if(!item)throw Error('找不到這則公告');let fileContent='';if(item.contentFile){const cr=await fetch(item.contentFile,{cache:'no-store'});if(cr.ok)fileContent=await cr.text()}const rawContent=Array.isArray(item.content)?item.content.join('\n'):String(fileContent||item.content||item.summary||'');const content=rawContent.split(/\n\s*\n/).map(p=>`<p>${safe(p)}</p>`).join('');app.innerHTML=`<article class="panel"><img class="hero" src="${safe(imageUrl(item.image))}" alt="${safe(item.title||'公告圖片')}"><div class="content"><div class="meta"><span class="tag">${safe(item.tag||'公告')}</span>${item.pinned?'<span class="tag pin">置頂公告</span>':''}<span>${safe(item.date||'')}</span>${item.expiresAt?`<span>有效至 ${safe(item.expiresAt)}</span>`:''}</div><h1>${safe(item.title||'公告詳情')}</h1>${item.summary?`<p class="summary">${safe(item.summary)}</p>`:''}<div class="body">${content}</div></div></article>`}
+    main().catch(e=>app.innerHTML=`<div class="panel not-found">${safe(e.message)}<br><br><a href="index.html">返回公告列表</a></div>`);
+  </script>
+</body>
+</html>
