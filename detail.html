@@ -26,17 +26,25 @@
     .body { color:#30445b; font-size:1rem; line-height:2; white-space:pre-line; overflow-wrap:anywhere; word-break:break-word; }
     .body p { margin:0 0 1.1rem; }
     .not-found { max-width:700px; margin:5rem auto; padding:2rem; text-align:center; }
+    .article-nav { display:flex; justify-content:space-between; gap:1rem; max-width:1100px; margin:1rem auto 0; padding:0 1rem; }
+    .nav-button { display:inline-flex; align-items:center; gap:.55rem; min-width:8rem; padding:.75rem 1rem; border:1px solid #d5dee8; border-radius:8px; color:#17304f; background:rgb(255 255 255 / 78%); box-shadow:0 8px 22px rgb(28 51 79 / 9%); text-decoration:none; font-size:.86rem; font-weight:800; transition:.2s ease; }
+    .nav-button:hover { color:#fff; background:#0b2444; border-color:#0b2444; transform:translateY(-2px); }
+    .nav-button.disabled { visibility:hidden; pointer-events:none; }
+    @media(max-width:600px) { .article-nav { padding:0 .6rem; } .nav-button { min-width:0; flex:1; justify-content:center; font-size:.78rem; } }
     @media(max-width:600px) { .article { margin-top:1rem; } .hero { max-height:70vh; } .content { padding:1.3rem; } }
   </style>
 </head>
 <body>
   <header class="top"><div class="top-inner"><span class="brand">OFFICIAL ANNOUNCEMENT</span><a class="back" href="index.html">← 返回公告列表</a></div></header>
-  <main id="app" class="article"><div class="panel not-found">正在載入公告詳情…</div></main>
+  <main id="app" class="article"><div class="panel not-found">正在載入公告詳情…</div></main><nav id="articleNav" class="article-nav" aria-label="公告前後篇"></nav>
   <script>
-    const app=document.getElementById('app');
+    const app=document.getElementById('app'),articleNav=document.getElementById('articleNav');
     function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-    function imageUrl(v){let p=String(v||'').trim();if(!/^(https?:|data:|blob:)/i.test(p)){p=p.replace(/^\/+/, '');if(!p.startsWith('data/'))p='data/'+p;p=new URL(p,document.baseURI).href}return p}
-    async function main(){const id=new URLSearchParams(location.search).get('id');const r=await fetch('data/announcements.json',{cache:'no-store'});if(!r.ok)throw Error('找不到公告資料');const d=await r.json();const list=Array.isArray(d)?d:d.announcements||[];const item=list.find((x,i)=>String(x.id??i)===String(id));if(!item)throw Error('找不到這則公告');let fileContent='';if(item.contentFile){const cr=await fetch(item.contentFile,{cache:'no-store'});if(cr.ok)fileContent=await cr.text()}const rawContent=Array.isArray(item.content)?item.content.join('\n'):String(fileContent||item.content||item.summary||'');const content=rawContent.split(/\n\s*\n/).map(p=>`<p>${safe(p)}</p>`).join('');app.innerHTML=`<article class="panel"><img class="hero" src="${safe(imageUrl(item.image))}" alt="${safe(item.title||'公告圖片')}"><div class="content"><div class="meta"><span class="tag">${safe(item.tag||'公告')}</span>${item.pinned?'<span class="tag pin">置頂公告</span>':''}<span>${safe(item.date||'')}</span>${item.expiresAt?`<span>有效至 ${safe(item.expiresAt)}</span>`:''}</div><h1>${safe(item.title||'公告詳情')}</h1>${item.summary?`<p class="summary">${safe(item.summary)}</p>`:''}<div class="body">${content}</div></div></article>`}
+    function imageUrl(v){let p=String(v||'').trim();if(!p)return '';if(!/^(https?:|data:|blob:)/i.test(p)){p=p.replace(/^\/+/, '');if(!p.startsWith('data/'))p=p.startsWith('images/')?'data/'+p:'data/images/'+p;p=new URL(p,document.baseURI).href}return p}
+    function dateValue(v,end=false){if(!v)return null;const t=String(v).replaceAll('.','-');return new Date(/^\d{4}-\d{2}-\d{2}$/.test(t)?t+(end?'T23:59:59':'T00:00:00'):t)}
+    function active(x){const end=dateValue(x.expiresAt,true);return !end||end>=new Date()}
+    function renderNavigation(items,index){const previous=items[index-1],next=items[index+1];articleNav.innerHTML=`<a class="nav-button ${previous?'':'disabled'}" href="${previous?`detail.html?id=${encodeURIComponent(previous.id??index-1)}`:'#'}">← 上一篇公告</a><a class="nav-button ${next?'':'disabled'}" href="${next?`detail.html?id=${encodeURIComponent(next.id??index+1)}`:'#'}">下一篇公告 →</a>`}
+    async function main(){const id=new URLSearchParams(location.search).get('id');const r=await fetch('data/announcements.json',{cache:'no-store'});if(!r.ok)throw Error('找不到公告資料');const d=await r.json();const list=(Array.isArray(d)?d:d.announcements||[]).filter(active);const index=list.findIndex((x,i)=>String(x.id??i)===String(id));const item=list[index];if(!item)throw Error('找不到這則公告');let fileContent='';if(item.contentFile){let contentPath=String(item.contentFile).trim().replace(/^\/+/, '');if(!contentPath.startsWith('data/'))contentPath=contentPath.startsWith('content/')?'data/'+contentPath:'data/content/'+contentPath;const cr=await fetch(contentPath,{cache:'no-store'});if(cr.ok)fileContent=await cr.text()}const rawContent=Array.isArray(item.content)?item.content.join('\n'):String(fileContent||item.content||item.summary||'');const content=rawContent.split(/\n\s*\n/).map(p=>`<p>${safe(p)}</p>`).join('');renderNavigation(list,index);app.innerHTML=`<article class="panel"><img class="hero" src="${safe(imageUrl(item.image))}" alt="${safe(item.title||'公告圖片')}"><div class="content"><div class="meta"><span class="tag">${safe(item.tag||'公告')}</span>${item.pinned?'<span class="tag pin">置頂公告</span>':''}<span>${safe(item.date||'')}</span>${item.expiresAt?`<span>有效至 ${safe(item.expiresAt)}</span>`:''}</div><h1>${safe(item.title||'公告詳情')}</h1>${item.summary?`<p class="summary">${safe(item.summary)}</p>`:''}<div class="body">${content}</div></div></article>`}
     main().catch(e=>app.innerHTML=`<div class="panel not-found">${safe(e.message)}<br><br><a href="index.html">返回公告列表</a></div>`);
   </script>
 </body>
