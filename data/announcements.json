@@ -1,17 +1,10 @@
 [
-  {
-    "image": "公告1.jpg",
-    "title": "第一則公告",
-    "href": ""
-  },
-  {
-    "image": "公告2.jpg",
-    "title": "第二則公告",
-    "href": ""
-  },
-  {
-    "image": "公告3.png",
-    "title": "第三則公告",
-    "href": ""
-  }
+  {"image":"公告1.jpg","tag":"重要公告","title":"第一則公告標題","summary":"這裡放公告摘要內容，讓訪客快速掌握公告重點。","date":"2026.09.18","href":"https://example.com/news-1","buttonText":"查看詳情"},
+  {"image":"公告2.jpg","tag":"活動訊息","title":"第二則公告標題","summary":"補充活動時間、申請方式與重要提醒。","date":"2026.09.20","href":"https://example.com/news-2","buttonText":"立即查看"},
+  {"image":"公告3.png","tag":"最新消息","title":"第三則公告標題","summary":"公告摘要會顯示在輪播與下方最新公告卡片中。","date":"2026.09.25","href":"https://example.com/news-3","buttonText":"查看詳情"},
+  {"image":"公告4.jpg","tag":"政策宣導","title":"第四則公告標題","summary":"提供政策說明與相關參考資訊，歡迎點選查看完整內容。","date":"2026.09.28","href":"https://example.com/news-4","buttonText":"瞭解更多"},
+  {"image":"公告5.jpg","tag":"行政公告","title":"第五則公告標題","summary":"請留意本公告所載日期與辦理方式，並依期限完成相關作業。","date":"2026.10.01","href":"https://example.com/news-5","buttonText":"查看詳情"},
+  {"image":"公告6.png","tag":"服務資訊","title":"第六則公告標題","summary":"最新服務時間、洽詢方式與申辦資訊整理如下。","date":"2026.10.03","href":"https://example.com/news-6","buttonText":"立即查看"},
+  {"image":"公告7.jpg","tag":"重要提醒","title":"第七則公告標題","summary":"敬請相關人員留意公告內容，謝謝您的配合。","date":"2026.10.06","href":"https://example.com/news-7","buttonText":"查看詳情"},
+  {"image":"公告8.jpg","tag":"活動訊息","title":"第八則公告標題","summary":"活動報名與最新消息將持續更新，歡迎定期查看。","date":"2026.10.10","href":"https://example.com/news-8","buttonText":"報名資訊"}
 ]
