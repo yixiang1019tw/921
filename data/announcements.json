@@ -2,14 +2,15 @@
   {
     "id": "notice-000",
     "image": "新公告.jpg",
-    "tag": "000重要公告",
+    "tag": "重要公告",
     "pinned": true,
     "title": "校務重要公告",
     "summary": "這裡是第一則公告的摘要內容，方便訪客在首頁快速掌握重點。",
     "contentFile": "新公告.txt",
     "date": "2026.09.18",
     "expiresAt": "2026.12.31",
-    "buttonText": "查看詳情"
+    "linkType": "internal",
+    "buttonText": "了解更多"
   },
   {
     "id": "notice-001",
@@ -21,7 +22,8 @@
     "contentFile": "公告1.txt",
     "date": "2026.09.18",
     "expiresAt": "2026.12.31",
-    "buttonText": "查看詳情"
+    "linkType": "internal",
+    "buttonText": "了解更多"
   },
   {
     "id": "notice-002",
@@ -33,7 +35,9 @@
     "contentFile": "公告2.txt",
     "date": "2026.09.20",
     "expiresAt": "2026.10.15",
-    "buttonText": "立即查看"
+    "linkType": "external",
+    "link": "https://example.com/event",
+    "buttonText": "立即報名"
   },
   {
     "id": "notice-003",
@@ -45,6 +49,7 @@
     "contentFile": "公告3.txt",
     "date": "2026.09.25",
     "expiresAt": "2026.10.16",
-    "buttonText": "查看詳情"
+    "linkType": "internal",
+    "buttonText": "了解更多"
   }
 ]
