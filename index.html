@@ -95,7 +95,7 @@
     .latest-card { cursor: pointer; }
     .latest-card:focus-within { border-color: rgb(198 161 91 / 62%); }
     .latest-card:hover { transform: translateY(-7px); border-color: rgb(198 161 91 / 62%); box-shadow: 0 22px 42px rgb(35 61 91 / 18%), 0 0 0 1px rgb(198 161 91 / 12%); }
-    .latest-thumb { display: block; width: 100%; aspect-ratio: 5 / 2; object-fit: cover; object-position: center; background: linear-gradient(135deg, #dfe7f0, #f8fafc); }
+    .latest-thumb { display: block; width: 100%; aspect-ratio: 5 / 2; object-fit: contain; object-position: center; background: linear-gradient(135deg, #dfe7f0, #f8fafc); }
     .latest-content { display: flex; flex: 1; flex-direction: column; padding: 1rem 1.1rem 1.15rem; }
     .latest-meta { display: flex; justify-content: space-between; gap: .7rem; color: #9a7a3d; font-size: .7rem; font-weight: 800; letter-spacing: .08em; }
     .latest-card-title { margin: .55rem 0 .4rem; color: var(--navy); font-size: 1.05rem; line-height: 1.45; }
@@ -140,23 +140,225 @@
     </section>
   </main>
   <script>
-    const track=document.getElementById('track'),dots=document.getElementById('dots'),message=document.getElementById('message'),viewport=document.querySelector('.viewport'),footer=document.querySelector('.board-foot'),counter=document.getElementById('counter'),progressBar=document.getElementById('progressBar'),pause=document.getElementById('pause'),latestGrid=document.getElementById('latestGrid'),latestPages=document.getElementById('latestPages');let announcements=[],current=0,timer=null,paused=false,latestPage=1,latestFilter='全部',searchTerm='',sortOrder='newest';const latestPerPage=6;
-    function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-    function imageUrl(v){let p=String(v||'').trim();if(!p)return '';if(!/^(https?:|data:|blob:)/i.test(p)){p=p.replace(/^\/+/, '');if(!p.startsWith('data/'))p=p.startsWith('images/')?'data/'+p:'data/images/'+p;p=new URL(p,document.baseURI).href}return p}
-    function dateValue(v,end=false){if(!v)return null;const t=String(v).replaceAll('.','-');return new Date(/^\d{4}-\d{2}-\d{2}$/.test(t)?t+(end?'T23:59:59':'T00:00:00'):t)}
-    function isActive(i){const end=dateValue(i.expiresAt,true);return !end||end>=new Date()}
-    function detailUrl(i,n){return i.detailUrl||`detail.html?id=${encodeURIComponent(i.id??n)}`}
-    function actionUrl(i,n){return i.linkType==='external'&&i.link?i.link:detailUrl(i,n)}
-    function actionTarget(i){return i.linkType==='external'?'_blank':'_top'}
-    async function load(){const r=await fetch('data/announcements.json',{cache:'no-store'});if(!r.ok)throw Error('找不到 data/announcements.json');const d=await r.json();return(Array.isArray(d)?d:d.announcements||[]).map((i,n)=>({...i,_index:n,image:imageUrl(i.image)})).filter(i=>i.image&&isActive(i)).sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned)))}
-    function render(){if(!announcements.length){message.textContent='目前沒有公告，請檢查 data/announcements.json';return}message.hidden=true;viewport.hidden=false;footer.hidden=false;track.innerHTML=announcements.map((i,n)=>{const image=`<img class="slide-image" src="${safe(i.image)}" alt="${safe(i.title||'公告圖片')}" loading="${n?'lazy':'eager'}">`;const url=actionUrl(i,i._index),target=actionTarget(i);const link=`<a class="slide-link" href="${safe(url)}" target="${target}" rel="noopener">${image}</a>`;const detail=`<a class="detail-button" href="${safe(url)}" target="${target}" rel="noopener">${safe(i.buttonText||'了解更多')}</a>`;return`<figure class="slide">${link}<div class="shade"></div><div class="slide-info"><span class="tag">${safe(i.tag||'重要公告')}</span><h2 class="slide-title">${safe(i.title||'最新公告')}</h2>${i.summary?`<p class="slide-summary">${safe(i.summary)}</p>`:''}${i.date?`<p class="slide-date">發布日期｜${safe(i.date)}</p>`:''}${detail}</div></figure>`}).join('');track.querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>{img.classList.add('error');img.alt='圖片載入失敗，請確認 data 資料夾檔名'}));dots.innerHTML=announcements.map((_,i)=>`<button class="dot" type="button" aria-label="第 ${i+1} 則公告" data-index="${i}"></button>`).join('');dots.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>goTo(+b.dataset.index)));update();renderFilters();renderLatest();start()}
-    function filteredAnnouncements(){const q=searchTerm.trim().toLowerCase();return announcements.filter(i=>{const category=i.tag||'未分類';const text=[i.title,i.summary,i.tag,i.date].join(' ').toLowerCase();return (latestFilter==='全部'||category===latestFilter)&&(!q||text.includes(q))}).sort((a,b)=>{const da=dateValue(a.date)?.getTime()||0,db=dateValue(b.date)?.getTime()||0;return sortOrder==='newest'?db-da:da-db})}
-    function renderFilters(){const categories=['全部',...new Set(announcements.map(i=>i.tag||'未分類'))];document.getElementById('latestFilter').innerHTML=categories.map(c=>`<button class="filter-button ${c===latestFilter?'active':''}" type="button" data-filter="${safe(c)}">${safe(c)}</button>`).join('');document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{latestFilter=b.dataset.filter;latestPage=1;renderFilters();renderLatest()}))}
-    function renderLatest(){const filtered=filteredAnnouncements();document.getElementById('latestCount').textContent=`共 ${filtered.length} 則`;const total=Math.ceil(filtered.length/latestPerPage);if(latestPage>Math.max(total,1))latestPage=1;const start=(latestPage-1)*latestPerPage;latestGrid.innerHTML=filtered.length?filtered.slice(start,start+latestPerPage).map(i=>{const url=actionUrl(i,i._index),target=actionTarget(i);return`<a class="latest-card" href="${safe(url)}" target="${target}" rel="noopener" aria-label="${safe(i.buttonText||'了解更多')}：${safe(i.title||'公告')}"><img class="latest-thumb" src="${safe(i.image)}" alt="${safe(i.title||'公告圖片')}" loading="lazy"><div class="latest-content"><div class="latest-meta"><span>${i.pinned?'置頂｜':''}${safe(i.tag||'公告')}</span><span>${safe(i.date||'')}</span></div><h3 class="latest-card-title">${safe(i.title||'最新公告')}</h3><p class="latest-summary">${safe(i.summary||'點選查看公告詳細內容。')}</p><span class="latest-link">${safe(i.buttonText||'了解更多')} →</span></div></a>`}).join(''):`<div class="latest-empty">找不到符合條件的公告。</div>`;latestPages.innerHTML=total>1?`<button class="page-button" type="button" ${latestPage===1?'disabled':''} data-page="${latestPage-1}">上一頁</button>${Array.from({length:total},(_,i)=>`<button class="page-button ${i+1===latestPage?'active':''}" type="button" data-page="${i+1}">${i+1}</button>`).join('')}<button class="page-button" type="button" ${latestPage===total?'disabled':''} data-page="${latestPage+1}">下一頁</button>`:'';latestPages.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{latestPage=+b.dataset.page;renderLatest();document.getElementById('latest-title').scrollIntoView({behavior:'smooth',block:'start'})}))}
-    function update(){track.style.transform=`translateX(-${current*100}%)`;counter.textContent=`${String(current+1).padStart(2,'0')} / ${String(announcements.length).padStart(2,'0')}`;progressBar.style.width=`${((current+1)/announcements.length)*100}%`;dots.querySelectorAll('.dot').forEach((b,i)=>b.classList.toggle('active',i===current))}
-    function goTo(i){if(!announcements.length)return;current=(i+announcements.length)%announcements.length;update();start()}
-    function start(){clearInterval(timer);if(!paused&&announcements.length>1)timer=setInterval(()=>goTo(current+1),6000)}
-    document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value;latestPage=1;renderLatest()});document.getElementById('sortSelect').addEventListener('change',e=>{sortOrder=e.target.value;latestPage=1;renderLatest()});document.getElementById('prev').onclick=()=>goTo(current-1);document.getElementById('next').onclick=()=>goTo(current+1);let touchStartX=0;viewport.addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0].clientX;clearInterval(timer)},{passive:true});viewport.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-touchStartX;if(Math.abs(dx)>45)goTo(current+(dx<0?1:-1));else if(!paused)start()},{passive:true});pause.onclick=()=>{paused=!paused;pause.textContent=paused?'▶':'Ⅱ';pause.setAttribute('aria-label',paused?'繼續輪播':'暫停輪播');if(paused)clearInterval(timer);else start()};viewport.addEventListener('mouseenter',()=>{if(!paused)clearInterval(timer)});viewport.addEventListener('mouseleave',()=>{if(!paused)start()});document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')goTo(current-1);if(e.key==='ArrowRight')goTo(current+1);if(e.key===' '){e.preventDefault();pause.click()}});load().then(d=>{announcements=d;render()}).catch(e=>message.textContent='公告載入失敗：'+e.message);
+    (() => {
+      'use strict';
+
+      const $ = (selector, scope = document) => scope.querySelector(selector);
+      const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
+      const els = {
+        track: $('#track'), dots: $('#dots'), message: $('#message'), viewport: $('.viewport'),
+        footer: $('.board-foot'), counter: $('#counter'), progress: $('#progressBar'), pause: $('#pause'),
+        latestGrid: $('#latestGrid'), latestPages: $('#latestPages'), latestFilter: $('#latestFilter'),
+        latestCount: $('#latestCount'), latestTitle: $('#latest-title'), search: $('#searchInput'), sort: $('#sortSelect'),
+        prev: $('#prev'), next: $('#next')
+      };
+      const state = { items: [], current: 0, timer: null, paused: false, page: 1, filter: '全部', query: '', sort: 'newest' };
+      const PAGE_SIZE = 6;
+      const ROTATE_MS = 6000;
+
+      function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
+      }
+
+      function parseDate(value, endOfDay = false) {
+        if (!value) return null;
+        const raw = String(value).trim().replaceAll('.', '-');
+        const normalized = /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw + (endOfDay ? 'T23:59:59' : 'T00:00:00') : raw;
+        const date = new Date(normalized);
+        return Number.isNaN(date.getTime()) ? null : date;
+      }
+
+      function isActive(item) {
+        const end = parseDate(item.expiresAt, true);
+        const now = new Date();
+        return !end || end >= now;
+      }
+
+      function safeUrl(value, fallback = '#') {
+        const raw = String(value ?? '').trim();
+        if (!raw) return fallback;
+        if (/^(javascript|vbscript|data):/i.test(raw)) return fallback;
+        try {
+          const url = new URL(raw, document.baseURI);
+          if (!['http:', 'https:'].includes(url.protocol)) return fallback;
+          return url.href;
+        } catch { return fallback; }
+      }
+
+      function imageUrl(value) {
+        const raw = String(value ?? '').trim();
+        if (!raw) return '';
+        if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
+        const clean = raw.replace(/^\/+/, '');
+        const path = clean.startsWith('data/') ? clean : (clean.startsWith('images/') ? `data/${clean}` : `data/images/${clean}`);
+        return new URL(path, document.baseURI).href;
+      }
+
+      function detailUrl(item, index) {
+        return safeUrl(item.detailUrl || `detail.html?id=${encodeURIComponent(item.id ?? index)}`, '#');
+      }
+
+      function actionUrl(item, index) {
+        if (item.linkType === 'external' && item.link) return safeUrl(item.link, detailUrl(item, index));
+        return detailUrl(item, index);
+      }
+
+      function targetFor(item) { return item.linkType === 'external' ? '_blank' : '_top'; }
+
+      async function loadData() {
+        const response = await fetch('data/announcements.json', { cache: 'no-store' });
+        if (!response.ok) throw new Error('找不到 data/announcements.json');
+        const payload = await response.json();
+        const source = Array.isArray(payload) ? payload : payload.announcements;
+        if (!Array.isArray(source)) throw new Error('公告資料格式錯誤');
+        return source.map((item, index) => ({ ...item, _index: index, image: imageUrl(item.image) }))
+          .filter(item => item.title && item.image && isActive(item))
+          .sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)));
+      }
+
+      function renderHero() {
+        const { items } = state;
+        if (!items.length) {
+          els.message.hidden = false;
+          els.message.textContent = '目前沒有可顯示的公告。';
+          els.viewport.hidden = true;
+          els.footer.hidden = true;
+          return;
+        }
+        els.message.hidden = true;
+        els.viewport.hidden = false;
+        els.footer.hidden = false;
+        els.track.innerHTML = items.map((item, index) => {
+          const url = escapeHtml(actionUrl(item, item._index));
+          const target = targetFor(item);
+          return `<figure class="slide">
+            <a class="slide-link" href="${url}" target="${target}" rel="noopener noreferrer">
+              <img class="slide-image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="${index ? 'lazy' : 'eager'}" decoding="async">
+            </a>
+            <div class="shade" aria-hidden="true"></div>
+            <div class="slide-info">
+              <span class="tag">${escapeHtml(item.tag || '公告')}</span>
+              <h2 class="slide-title">${escapeHtml(item.title)}</h2>
+              ${item.summary ? `<p class="slide-summary">${escapeHtml(item.summary)}</p>` : ''}
+              ${item.date ? `<p class="slide-date">發布日期｜${escapeHtml(item.date)}</p>` : ''}
+              <a class="detail-button" href="${url}" target="${target}" rel="noopener noreferrer">${escapeHtml(item.buttonText || '了解更多')}</a>
+            </div>
+          </figure>`;
+        }).join('');
+        $$('.slide-image', els.track).forEach(img => img.addEventListener('error', () => {
+          img.classList.add('error');
+          img.alt = '圖片載入失敗，請確認圖片檔名與路徑';
+        }, { once: true }));
+        els.dots.innerHTML = items.map((item, index) => `<button class="dot" type="button" aria-label="第 ${index + 1} 則公告：${escapeHtml(item.title)}" data-index="${index}"></button>`).join('');
+        $$('.dot', els.dots).forEach(button => button.addEventListener('click', () => goTo(Number(button.dataset.index))));
+        updateHero();
+        startTimer();
+      }
+
+      function filteredItems() {
+        const query = state.query.trim().toLocaleLowerCase();
+        return state.items.filter(item => {
+          const category = item.tag || '未分類';
+          const haystack = [item.title, item.summary, item.tag, item.date].join(' ').toLocaleLowerCase();
+          return (state.filter === '全部' || category === state.filter) && (!query || haystack.includes(query));
+        }).sort((a, b) => {
+          const da = parseDate(a.date)?.getTime() || 0;
+          const db = parseDate(b.date)?.getTime() || 0;
+          return state.sort === 'newest' ? db - da : da - db;
+        });
+      }
+
+      function renderFilters() {
+        const categories = ['全部', ...new Set(state.items.map(item => item.tag || '未分類'))];
+        els.latestFilter.innerHTML = categories.map(category => `<button class="filter-button ${category === state.filter ? 'active' : ''}" type="button" data-filter="${escapeHtml(category)}" aria-pressed="${category === state.filter}">${escapeHtml(category)}</button>`).join('');
+        $$('[data-filter]', els.latestFilter).forEach(button => button.addEventListener('click', () => {
+          state.filter = button.dataset.filter;
+          state.page = 1;
+          renderFilters();
+          renderLatest();
+        }));
+      }
+
+      function renderLatest() {
+        const items = filteredItems();
+        const pages = Math.ceil(items.length / PAGE_SIZE);
+        state.page = Math.min(state.page, Math.max(pages, 1));
+        const start = (state.page - 1) * PAGE_SIZE;
+        els.latestCount.textContent = `共 ${items.length} 則`;
+        els.latestGrid.innerHTML = items.length ? items.slice(start, start + PAGE_SIZE).map(item => {
+          const url = escapeHtml(actionUrl(item, item._index));
+          const target = targetFor(item);
+          return `<a class="latest-card" href="${url}" target="${target}" rel="noopener noreferrer" aria-label="${escapeHtml(item.buttonText || '了解更多')}：${escapeHtml(item.title)}">
+            <img class="latest-thumb" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async">
+            <span class="latest-content"><span class="latest-meta"><span>${item.pinned ? '置頂｜' : ''}${escapeHtml(item.tag || '公告')}</span><span>${escapeHtml(item.date || '')}</span></span><span class="latest-card-title">${escapeHtml(item.title)}</span><span class="latest-summary">${escapeHtml(item.summary || '點選查看公告詳細內容。')}</span><span class="latest-link">${escapeHtml(item.buttonText || '了解更多')} →</span></span>
+          </a>`;
+        }).join('') : '<div class="latest-empty">找不到符合條件的公告。</div>';
+        els.latestPages.innerHTML = pages > 1 ? `<button class="page-button" type="button" ${state.page === 1 ? 'disabled' : ''} data-page="${state.page - 1}">上一頁</button>${Array.from({ length: pages }, (_, index) => `<button class="page-button ${index + 1 === state.page ? 'active' : ''}" type="button" aria-current="${index + 1 === state.page ? 'page' : 'false'}" data-page="${index + 1}">${index + 1}</button>`).join('')}<button class="page-button" type="button" ${state.page === pages ? 'disabled' : ''} data-page="${state.page + 1}">下一頁</button>` : '';
+        $$('[data-page]', els.latestPages).forEach(button => button.addEventListener('click', () => {
+          if (button.disabled) return;
+          state.page = Number(button.dataset.page);
+          renderLatest();
+          els.latestTitle.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }));
+      }
+
+      function updateHero() {
+        if (!state.items.length) return;
+        els.track.style.transform = `translate3d(-${state.current * 100}%, 0, 0)`;
+        els.counter.textContent = `${String(state.current + 1).padStart(2, '0')} / ${String(state.items.length).padStart(2, '0')}`;
+        els.progress.style.width = `${((state.current + 1) / state.items.length) * 100}%`;
+        $$('.dot', els.dots).forEach((dot, index) => {
+          const active = index === state.current;
+          dot.classList.toggle('active', active);
+          dot.setAttribute('aria-current', active ? 'true' : 'false');
+        });
+      }
+
+      function stopTimer() { clearInterval(state.timer); state.timer = null; }
+      function startTimer() { stopTimer(); if (!state.paused && state.items.length > 1) state.timer = setInterval(() => goTo(state.current + 1, false), ROTATE_MS); }
+      function goTo(index, restart = true) {
+        if (!state.items.length) return;
+        state.current = (index + state.items.length) % state.items.length;
+        updateHero();
+        if (restart) startTimer();
+      }
+      function togglePause() {
+        state.paused = !state.paused;
+        els.pause.textContent = state.paused ? '▶' : 'Ⅱ';
+        els.pause.setAttribute('aria-label', state.paused ? '繼續輪播' : '暫停輪播');
+        els.pause.setAttribute('aria-pressed', String(state.paused));
+        state.paused ? stopTimer() : startTimer();
+      }
+
+      els.search.addEventListener('input', event => { state.query = event.target.value; state.page = 1; renderLatest(); });
+      els.sort.addEventListener('change', event => { state.sort = event.target.value; state.page = 1; renderLatest(); });
+      els.prev.addEventListener('click', () => goTo(state.current - 1));
+      els.next.addEventListener('click', () => goTo(state.current + 1));
+      els.pause.addEventListener('click', togglePause);
+      let touchStartX = null;
+      els.viewport.addEventListener('pointerdown', event => { touchStartX = event.clientX; stopTimer(); }, { passive: true });
+      els.viewport.addEventListener('pointerup', event => {
+        if (touchStartX !== null) {
+          const delta = event.clientX - touchStartX;
+          if (Math.abs(delta) > 45) goTo(state.current + (delta < 0 ? 1 : -1));
+          else if (!state.paused) startTimer();
+        }
+        touchStartX = null;
+      }, { passive: true });
+      els.viewport.addEventListener('pointercancel', () => { touchStartX = null; if (!state.paused) startTimer(); }, { passive: true });
+      els.viewport.addEventListener('mouseenter', () => { if (!state.paused) stopTimer(); });
+      els.viewport.addEventListener('mouseleave', () => { if (!state.paused) startTimer(); });
+      document.addEventListener('keydown', event => {
+        const tag = document.activeElement?.tagName;
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
+        if (event.key === 'ArrowLeft') goTo(state.current - 1);
+        if (event.key === 'ArrowRight') goTo(state.current + 1);
+        if (event.key === ' ' || event.key.toLowerCase() === 'p') { event.preventDefault(); togglePause(); }
+      });
+
+      loadData().then(items => { state.items = items; renderHero(); renderFilters(); renderLatest(); })
+        .catch(error => { els.message.hidden = false; els.message.textContent = `公告載入失敗：${error.message}`; console.error(error); });
+    })();
   </script>
 </body>
 </html>
