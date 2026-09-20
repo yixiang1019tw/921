@@ -26,8 +26,8 @@
     "buttonText": "了解更多"
   },
   {
-    "id": "notice-002",
-    "image": "公告2.jpg",
+    "id": "notice-教師節",
+    "image": "教師節.jpg",
     "tag": "活動資訊",
     "pinned": false,
     "title": "年度活動報名資訊",
@@ -37,19 +37,7 @@
     "expiresAt": "2026.10.15",
     "linkType": "external",
     "link": "https://example.com/event",
-    "buttonText": "立即報名"
+    "buttonText": "立即祝福"
   },
-  {
-    "id": "notice-003",
-    "image": "公告3.png",
-    "tag": "行政修繕",
-    "pinned": false,
-    "title": "校舍修繕通知",
-    "summary": "施工期間請留意通行動線與相關安全提醒。",
-    "contentFile": "公告3.txt",
-    "date": "2026.09.25",
-    "expiresAt": "2026.10.16",
-    "linkType": "internal",
-    "buttonText": "了解更多"
-  }
+
 ]
