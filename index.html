@@ -35,7 +35,7 @@
       background: radial-gradient(circle at 85% 10%, rgb(198 161 91 / 24%), transparent 34%),
                   linear-gradient(115deg, #12335a 0%, #2c6090 100%);
     }
-    .notice-head { position: relative; z-index: 2; display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: clamp(1.15rem, 3vw, 2rem) clamp(1.2rem, 5vw, 4.5rem) 1.1rem; }
+    .notice-head { position: relative; z-index: 2; display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: clamp(1rem, 3vw, 2rem) clamp(1.05rem, 5vw, 4.5rem) 1rem; }
     .eyebrow { display: flex; align-items: center; gap: .65rem; margin: 0 0 .5rem; color: var(--gold-light); font-size: .74rem; font-weight: 700; letter-spacing: .22em; }
     .eyebrow::before { content: ""; width: 2.15rem; height: 1px; background: var(--gold); }
     h1 { margin: 0; font-size: clamp(1.55rem, 3.8vw, 2.65rem); font-weight: 800; letter-spacing: .1em; line-height: 1.15; }
@@ -122,7 +122,7 @@
 <body>
   <main class="notice-board" aria-label="最新公告">
     <header class="notice-head">
-      <div><p class="eyebrow"><h2>最新公告</h2></div>
+      <div><p class="eyebrow">OFFICIAL ANNOUNCEMENT</p><h2>最新公告</h2></div>
     </header>
     <div id="message" class="message">正在載入公告…</div>
     <div class="viewport" hidden><div id="track" class="track"></div><div class="controls"><button id="prev" class="arrow" type="button" aria-label="上一則公告">‹</button><button id="next" class="arrow" type="button" aria-label="下一則公告">›</button></div></div>
