@@ -23,7 +23,8 @@
     "contentFile": "",
     "date": "2026.09.20",
     "expiresAt": "2026.09.22",
-    "linkType": "internal",
-    "buttonText": ""
+    "linkType": "external",
+    "link": "https://udn.com/news/story/7266/9766158"
+    "buttonText": "了解詳情"
   }
 ]
