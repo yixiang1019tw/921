@@ -1,16 +1,17 @@
 [
   {
-    "id": "notice-000",
-    "image": "新公告.jpg",
-    "tag": "重要公告",
+    "id": "notice-教師節",
+    "image": "教師節.png",
+    "tag": "活動資訊",
     "pinned": true,
-    "title": "校務重要公告",
-    "summary": "這裡是第一則公告的摘要內容，方便訪客在首頁快速掌握重點。",
-    "contentFile": "新公告.txt",
-    "date": "2026.09.18",
-    "expiresAt": "2026.12.31",
-    "linkType": "internal",
-    "buttonText": "了解更多"
+    "title": "教師節感恩活動",
+    "summary": "為辛苦的老師，獻上祝福。",
+    "contentFile": "公告2.txt",
+    "date": "2026.09.20",
+    "expiresAt": "2026.09.28",
+    "linkType": "external",
+    "link": "https://succuland.com.tw/brands-project/teachers-day-wishes/",
+    "buttonText": "立即祝福"
   },
   {
     "id": "notice-001",
@@ -25,19 +26,4 @@
     "linkType": "internal",
     "buttonText": "了解更多"
   },
-  {
-    "id": "notice-教師節",
-    "image": "教師節.png",
-    "tag": "活動資訊",
-    "pinned": false,
-    "title": "教師節感恩活動",
-    "summary": "為辛苦的老師，獻上祝福。",
-    "contentFile": "公告2.txt",
-    "date": "2026.09.20",
-    "expiresAt": "2026.09.28",
-    "linkType": "external",
-    "link": "https://succuland.com.tw/brands-project/teachers-day-wishes/",
-    "buttonText": "立即祝福"
-  }
-
 ]
