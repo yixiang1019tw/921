@@ -17,7 +17,7 @@
     "id": "notice-001",
     "image": "1.jpg",
     "tag": "重要公告",
-    "pinned": true,
+    "pinned": false,
     "title": "校務重要公告",
     "summary": "這裡是第一則公告的摘要內容，方便訪客在首頁快速掌握重點。",
     "contentFile": "公告1.txt",
