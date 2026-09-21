@@ -28,17 +28,14 @@
     "buttonText": "了解詳情"
   },
   {
-    "id": "notice-921防災演練",
-    "image": "921防災演練.png",
+    "id": "notice-雙節快樂",
+    "image": "中秋節&教師節 雙節快樂.png",
     "tag": "重要公告",
     "pinned": true,
-    "title": "921防災演練",
-    "summary": "9/21大地震全國校園防災演練。",
+    "title": "中秋節&教師節 雙節快樂",
+    "summary": "桃李滿天下，月圓正當時",
     "contentFile": "",
-    "date": "2026.09.20",
-    "expiresAt": "2026.09.22",
-    "linkType": "external",
-    "link": "https://udn.com/news/story/7266/9766158",
-    "buttonText": "了解詳情"
+    "date": "2026.09.21",
+    "expiresAt": "2026.09.29",
   }
 ]
